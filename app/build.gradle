@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace 'com.spase_y.playlistmaker05022024'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.spase_y.playlistmaker05022024"
         minSdk 29
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
