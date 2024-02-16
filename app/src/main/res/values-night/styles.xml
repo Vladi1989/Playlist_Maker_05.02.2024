@@ -63,4 +63,18 @@
         <item name="android:backgroundTint">@color/white</item>
     </style>
 
+    <style name="settings_card_view_style">
+        <item name="cardBackgroundColor">@color/white</item>
+    </style>
+
+    <style name="search_et">
+        <item name="android:drawableTint">@color/black</item>
+        <item name="android:textColorHint">@color/black</item>
+    </style>
+
+    <style name="search_clear">
+        <item name="android:backgroundTint">@color/black</item>
+    </style>
+
+
 </resources>
