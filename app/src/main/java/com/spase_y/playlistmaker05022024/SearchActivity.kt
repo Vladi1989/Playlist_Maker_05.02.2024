@@ -32,7 +32,7 @@ class SearchActivity : AppCompatActivity() {
         val editText = findViewById<EditText>(R.id.editText)
         val arrowBack = findViewById<ImageButton>(R.id.buttonBack)
         arrowBack.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
+            finish()
         }
 
         val clear = findViewById<ImageView>(R.id.clear)
