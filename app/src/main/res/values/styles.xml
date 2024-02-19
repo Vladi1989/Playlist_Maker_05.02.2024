@@ -63,4 +63,19 @@
     <style name="settings_arrow">
         <item name="android:backgroundTint">@color/black</item>
     </style>
+
+    <style name="settings_card_view_style">
+        <item name="cardBackgroundColor">@color/gray</item>
+    </style>
+
+    <style name="search_et">
+        <item name="android:drawableTint">@color/gray2</item>
+        <item name="android:textColorHint">@color/gray2</item>
+    </style>
+
+    <style name="search_clear">
+        <item name="android:backgroundTint">@color/gray2</item>
+    </style>
+
+
 </resources>

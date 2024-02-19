@@ -65,6 +65,7 @@
                 android:layout_weight="1"/>
 
             <ImageView style="@style/settings_images_style"
+                android:id="@+id/btnShare"
                 android:background="@drawable/share"/>
 
         </LinearLayout>
@@ -80,6 +81,7 @@
                 android:layout_weight="1"/>
 
             <ImageView style="@style/settings_images_style"
+                android:id="@+id/btnSupport"
                 android:background="@drawable/support"/>
         </LinearLayout>
 
@@ -94,6 +96,7 @@
                 android:layout_weight="1"/>
 
             <ImageView style="@style/settings_images_style"
+                android:id="@+id/btnUserAgreement"
                 android:background="@drawable/arrow_small" />
         </LinearLayout>
 
