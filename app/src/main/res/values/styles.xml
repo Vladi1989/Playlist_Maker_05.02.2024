@@ -77,5 +77,19 @@
         <item name="android:backgroundTint">@color/gray2</item>
     </style>
 
+    <style name="tv_text">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="tv_text2">
+        <item name="android:textColor">@color/gray2</item>
+    </style>
+
+    <style name="iv_image">
+        <item name="android:textColor">@color/gray2</item>
+    </style>
+
+
+
 
 </resources>
