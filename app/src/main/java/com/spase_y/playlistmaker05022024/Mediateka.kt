@@ -11,7 +11,7 @@ class Mediateka : AppCompatActivity() {
         setContentView(R.layout.activity_mediateka)
         val arrowBack = findViewById<ImageButton>(R.id.buttonBack)
         arrowBack.setOnClickListener {
-            startActivity(Intent(this,MainActivity::class.java))
+            finish()
         }
     }
 }
