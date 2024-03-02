@@ -20,7 +20,7 @@ class TracksAdapter:RecyclerView.Adapter<TracksAdapter.TracksViewHolder>() {
             tvName.text = track.trackName
             tvNameArtists.text = track.artistName
             tvDuration.text = track.trackTime
-            Glide.with(itemView.context).load(track.artworkUrl100).fitCenter().error(R.drawable.no_internet).into(ivLogo)
+            Glide.with(itemView.context).load(track.artworkUrl100).fitCenter().error(R.drawable.placeholder).into(ivLogo)
 
         }
     }
