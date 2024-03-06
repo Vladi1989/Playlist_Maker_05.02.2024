@@ -88,6 +88,18 @@
         <item name="android:backgroundTint">@color/white</item>
     </style>
 
+    <style name="not_fond_style">
+        <item name="android:src">@drawable/not_found_night</item>
+    </style>
+
+    <style name="failure_style">
+        <item name="android:src">@drawable/no_internet_night</item>
+    </style>
+
+    <style name="btn_update">
+        <item name="android:backgroundTint">@color/white</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
 
 
 </resources>
