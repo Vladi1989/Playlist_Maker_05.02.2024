@@ -111,8 +111,11 @@ class SearchActivity : AppCompatActivity() {
                 trackAdapter.listTracks = ArrayList(listTracks?.results)
                 trackAdapter.notifyDataSetChanged()
             }
+            @SuppressLint("NotifyDataSetChanged")
             override fun onFailure(call: Call<TracksList>, t: Throwable) {
                 noInternet.visibility = View.VISIBLE
+                trackAdapter.listTracks = ArrayList()
+                trackAdapter.notifyDataSetChanged()
             }
         })
     }
