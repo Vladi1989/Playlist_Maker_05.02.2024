@@ -1,14 +1,20 @@
 package com.spase_y.playlistmaker05022024.adapter
 
+import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.spase_y.playlistmaker05022024.R
+import com.spase_y.playlistmaker05022024.SearchHistory
 import com.spase_y.playlistmaker05022024.Track
+import java.text.SimpleDateFormat
+import java.util.*
 
 class TracksAdapter:RecyclerView.Adapter<TracksAdapter.TracksViewHolder>() {
     class TracksViewHolder(itemView: View):RecyclerView.ViewHolder(itemView) {
@@ -19,7 +25,18 @@ class TracksAdapter:RecyclerView.Adapter<TracksAdapter.TracksViewHolder>() {
             val ivLogo = itemView.findViewById<ImageView>(R.id.ivTrack)
             tvName.text = track.trackName
             tvNameArtists.text = track.artistName
-            tvDuration.text = track.trackTime
+            val searchHistory = SearchHistory(itemView.context.getSharedPreferences("History shared preference", Context.MODE_PRIVATE))
+            itemView.setOnClickListener{
+                if (searchHistory.getAllItems().contains(track)){
+                    searchHistory.deleteItem(track)
+                    searchHistory.addItem(track)
+                }
+                else if(searchHistory.getAllItems().size < 10){
+                    searchHistory.addItem(track)
+                }
+            }
+
+            tvDuration.text = SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis)
             Glide.with(itemView.context).load(track.artworkUrl100).fitCenter().error(R.drawable.placeholder).into(ivLogo)
 
         }

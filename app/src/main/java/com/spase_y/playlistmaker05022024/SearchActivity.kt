@@ -1,21 +1,27 @@
 package com.spase_y.playlistmaker05022024
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
-import androidx.core.view.isInvisible
+import android.widget.ScrollView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.spase_y.playlistmaker05022024.adapter.TracksAdapter
+import retrofit2.*
+import retrofit2.converter.gson.GsonConverterFactory
 
 
 class SearchActivity : AppCompatActivity() {
@@ -30,17 +36,65 @@ class SearchActivity : AppCompatActivity() {
         }
     }
     val trackAdapter = TracksAdapter()
+    val savedTracksAdapter = TracksAdapter()
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://itunes.apple.com")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+    val searchHistory by lazy {
+        SearchHistory(getSharedPreferences("History shared preference", Context.MODE_PRIVATE))
+    }
+    val editText by lazy {
+        findViewById<EditText>(R.id.editText)
+    }
+    val arrowBack by lazy {
+        findViewById<ImageButton>(R.id.buttonBack)
+    }
+    val clNotFound by lazy {
+        findViewById<ConstraintLayout>(R.id.clNotFound)
+    }
+    val noInternet by lazy {
+        findViewById<ConstraintLayout>(R.id.clFailure)
+    }
+    val btnUpdate by lazy {
+        findViewById<AppCompatButton>(R.id.btnUpdate)
+    }
+    val rvHistory by lazy {
+        findViewById<RecyclerView>(R.id.rvHistory)
+    }
+    val clHistory by lazy {
+        findViewById<ScrollView>(R.id.clHistory)
+    }
+    val btnClearHistory by lazy {
+        findViewById<AppCompatButton>(R.id.btnClearHistory)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
-        val editText = findViewById<EditText>(R.id.editText)
-        val arrowBack = findViewById<ImageButton>(R.id.buttonBack)
+        btnClearHistory.setOnClickListener {
+            searchHistory.deleteAllItems()
+            savedTracksAdapter.listTracks = arrayListOf<Track>()
+            savedTracksAdapter.notifyDataSetChanged()
+            clHistory.visibility = View.GONE
+        }
         arrowBack.setOnClickListener {
             finish()
         }
-
+        btnUpdate.setOnClickListener {
+            noInternet.visibility = View.GONE
+            makeRequest()
+        }
+        editText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                makeRequest()
+                true
+            }
+            false
+        }
         val clear = findViewById<ImageView>(R.id.clear)
         clear.setOnClickListener {
+            trackAdapter.listTracks = arrayListOf()
+            trackAdapter.notifyDataSetChanged()
             editText.setText("")
             val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
             inputMethodManager?.hideSoftInputFromWindow(editText.windowToken, 0)
@@ -56,47 +110,53 @@ class SearchActivity : AppCompatActivity() {
                     View.INVISIBLE
                 }
                 else View.VISIBLE
+                if(p0.toString().isNullOrEmpty() && searchHistory.getAllItems().isNotEmpty()){
+                    clHistory.visibility = View.VISIBLE
+                }
+                else{
+                    clHistory.visibility = View.GONE
+                }
             }
         })
 
-        val listTracks = arrayListOf<Track>(
-            Track(
-                "Smells Like Teen Spirit",
-                "Nirvana",
-                "5:01",
-                "https://is5-ssl.mzstatic.com/image/thumb/Music115/v4/7b/58/c2/7b58c21a-2b51-2bb2-e59a-9bb9b96ad8c3/00602567924166.rgb.jpg/100x100bb.jpg"
-            ),
-            Track(
-                "Billie Jean",
-                "Michael Jackson",
-                "4:35",
-                "https://is5-ssl.mzstatic.com/image/thumb/Music125/v4/3d/9d/38/3d9d3811-71f0-3a0e-1ada-3004e56ff852/827969428726.jpg/100x100bb.jpg"
-            ),
-            Track(
-                "Stayin' Alive",
-                "Bee Gees",
-                "4:10",
-                "https://is4-ssl.mzstatic.com/image/thumb/Music115/v4/1f/80/1f/1f801fc1-8c0f-ea3e-d3e5-387c6619619e/16UMGIM86640.rgb.jpg/100x100bb.jpg"
-            ),
-            Track(
-                "Whole Lotta Love",
-                "Led Zeppelin",
-                "5:33",
-                "https://is2-ssl.mzstatic.com/image/thumb/Music62/v4/7e/17/e3/7e17e33f-2efa-2a36-e916-7f808576cf6b/mzm.fyigqcbs.jpg/100x100bb.jpg"
-            ),
-            Track(
-                "Sweet Child O'Mine",
-                "Guns N' Roses",
-                "5:03",
-                "https://is5-ssl.mzstatic.com/image/thumb/Music125/v4/a0/4d/c4/a04dc484-03cc-02aa-fa82-5334fcb4bc16/18UMGIM24878.rgb.jpg/100x100bb.jpg"
-            ),
-        )
+        if (editText.text.isEmpty() && searchHistory.getAllItems().isNotEmpty()){
+            clHistory.visibility = View.VISIBLE
+            rvHistory.layoutManager = LinearLayoutManager(this)
+            savedTracksAdapter.listTracks = searchHistory.getAllItems() as ArrayList<Track>
+            rvHistory.adapter = savedTracksAdapter
+        }
+        else{
+            clHistory.visibility = View.GONE
+        }
+
         val rv = findViewById<RecyclerView>(R.id.rvTracks)
         rv.layoutManager = LinearLayoutManager(this)
-        trackAdapter.listTracks = listTracks
         rv.adapter = trackAdapter
     }
-
+    fun makeRequest(){
+        val itunesApiService = retrofit.create<ItunesApiService>()
+        itunesApiService.search(editText.text.toString()).enqueue(object:Callback<TracksList>{
+            @SuppressLint("NotifyDataSetChanged")
+            override fun onResponse(
+                call: Call<TracksList>,
+                response: Response<TracksList>
+            ) {
+                val listTracks = response.body()
+                if (listTracks?.resultCount == 0){
+                    clNotFound.visibility = View.VISIBLE
+                }
+                else clNotFound.visibility = View.GONE
+                trackAdapter.listTracks = ArrayList(listTracks?.results)
+                trackAdapter.notifyDataSetChanged()
+            }
+            @SuppressLint("NotifyDataSetChanged")
+            override fun onFailure(call: Call<TracksList>, t: Throwable) {
+                noInternet.visibility = View.VISIBLE
+                trackAdapter.listTracks = ArrayList()
+                trackAdapter.notifyDataSetChanged()
+            }
+        })
+    }
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(EDIT_TEXT_TAG, findViewById<EditText>(R.id.editText).text.toString())
